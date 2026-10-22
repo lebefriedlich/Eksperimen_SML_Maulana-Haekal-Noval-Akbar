@@ -1,0 +1,43 @@
+name: Preprocessing Pipeline
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  preprocess:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python 3.12
+      uses: actions/setup-python@v4
+      with:
+        python-version: "3.12"
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pandas numpy scikit-learn
+
+    - name: Run preprocessing automation
+      run: |
+        python automate_Maulana-Haekal-Noval-Akbar.py --input heart_disease_raw/heart_disease.csv --output heart_disease_preprocessing
+
+    - name: Verify preprocessed dataset
+      run: |
+        ls -la heart_disease_preprocessing/
+        test -f heart_disease_preprocessing/heart_train.csv
+        test -f heart_disease_preprocessing/heart_test.csv
+        test -f heart_disease_preprocessing/heart_processed.csv
+
+    - name: Upload preprocessed dataset artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: preprocessed-dataset
+        path: heart_disease_preprocessing/
